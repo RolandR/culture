@@ -55,13 +55,32 @@ function calculateHeightDifferences(){
 		worldInfo.belowZero += (0 - worldInfo.min);
 		worldInfo.difference += worldInfo.belowZero;
 	}
+
+	var x = terrainPoints[0].length;
+	while(x--){
+		var y = terrainPoints.length;
+		while(y--){
+			terrainPoints[y][x].setRelativeHeight((terrainPoints[y][x].getHeight() + worldInfo.belowZero)/worldInfo.difference);
+		}
+	}
 }
 
 var shortEdge;
-if(canvas.width > canvas.height){
-	shortEdge = canvas.height;
-} else {
-	shortEdge = canvas.width;
+
+function windowResize(){
+
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	
+	if(canvas.width > canvas.height){
+		shortEdge = canvas.height;
+	} else {
+		shortEdge = canvas.width;
+	}
+
+	if(renderer){
+		renderer.render();
+	}
 }
 
 var terrainPoints = [
@@ -69,13 +88,13 @@ var terrainPoints = [
 	,[new TerrainPoint(0, 0, 1), new TerrainPoint(0, 1, 1)]
 ];
 
-var iterations = 7;
+var iterations = 8;
 
 var worldEdge = Math.pow(2, iterations) + 1;
 
 var heightScale = 1000;
 
-var ruggedness = 1.5; // lower for smoother terrain, higher for more extreme
+var ruggedness = 1; // lower for smoother terrain, higher for more extreme
 var waterLevel = 0;
 
 var gradientMin = -10;
@@ -88,10 +107,19 @@ var maxTemp = tempRange + minTemp;
 var animationframe = 0;
 var season = 0;
 
-document.getElementById("temperatureGradient").onload = init;
+var renderer = null;
+
+window.addEventListener('load', function(){
+	init();
+});
+
+window.addEventListener('resize', function(){
+	windowResize();
+});
 
 function init(){
 	prepareTemperatureGradient();
+	windowResize();
 
 	do{
 		terrainPoints = [
@@ -103,19 +131,24 @@ function init(){
 			addTerrainPoints();
 		}
 	} while(worldIsTooBoring());
-	
-	biomify();
+
+	renderer = new Renderer();
+
 	calculateHeightDifferences();
 	calculateHillshades();
-	render();
+	calculateLatitudes();
+	
+	biomify();
+	renderer.render();
 
-	setInterval(animate, 50);
+	setInterval(animate, 100);
+	
 }
 
 function animate(){
 	season = Math.sin(animationframe / 50);
 	biomify();
-	render();
+	renderer.render();
 	animationframe++;
 }
 
@@ -143,18 +176,24 @@ function TerrainPoint(elevation, x, y){
 	var isWater;
 	var temperature;
 	var hillshade;
+	var relativeHeight;
+	var latitude;
 
 	return {
-		 getHeight: function(){return elevation;}
-		,isWater: function(){return isWater;}
-		,getTemperature: function(){return temperature;}
-		,getHillshade: function(){return hillshade;}
-		,getX: function(){return x;}
-		,getY: function(){return y;}
+		 getHeight: 		function(){return elevation;}
+		,isWater: 			function(){return isWater;}
+		,getTemperature: 	function(){return temperature;}
+		,getHillshade: 		function(){return hillshade;}
+		,getRelativeHeight: function(){return relativeHeight;}
+		,getLatitude: 		function(){return latitude;}
+		,getX: 				function(){return x;}
+		,getY: 				function(){return y;}
 		
-		,setWater: function(w){isWater = w;}
-		,setTemperature: function(t){temperature = t;}
-		,setHillshade: function(h){hillshade = h;}
+		,setWater: 			function(w){isWater 		= w;}
+		,setTemperature: 	function(t){temperature 	= t;}
+		,setHillshade: 		function(h){hillshade 		= h;}
+		,setRelativeHeight: function(r){relativeHeight 	= r;}
+		,setLatitude: 		function(l){latitude	 	= l;}
 	};
 }
 
@@ -193,7 +232,7 @@ function calculateHillshades(){
 			var darken = 0;
 			var brighten = 0;
 			
-			for(var n = 1; n < 10; n++){
+			for(var n = 1; n <= 5; n++){
 				if(y >= terrainPoints.length - n || x >= terrainPoints[y].length - n){
 					brighten += 0;
 				} else {
@@ -214,28 +253,44 @@ function calculateHillshades(){
 			
 		}
 	}
-	
 }
 
-function biomify(){
-	
+function calculateLatitudes(){	
 	var worldWidth = terrainPoints[0].length;
 	var x = worldWidth;
 	while(x--){
 		var worldHeight = terrainPoints.length;
 		var y = worldHeight;
 		while(y--){
-			var tile = terrainPoints[y][x];
-			var worldEdgeLengths = terrainPoints.length
+			terrainPoints[y][x].setLatitude(1 - (Math.abs(y - worldHeight/2) / worldHeight*2));
+		}
+	}
+}
+
+function biomify(){
+
+	var tile;
+	var temp;
+	
+	var worldEdgeLengths = terrainPoints.length
+	
+	var worldWidth = terrainPoints[0].length;
+	var worldHeight = terrainPoints.length;
+	
+	var x = worldWidth;
+	while(x--){
+		var y = worldHeight;
+		while(y--){
+			
+			tile = terrainPoints[y][x];
 			
 			if(tile.getHeight() < waterLevel){
 				tile.setWater(true);
 			}
 
-			var equatorDist = 1 - (Math.abs(y - worldHeight/2) / worldHeight*2); // Distance to equator, 0 to 1
-			var temp = equatorDist * tempRange + minTemp;
+			temp = tile.getLatitude() * tempRange + minTemp;
 
-			temp += (y - worldHeight/2) * season/10;
+			temp += (y - worldHeight/2) * season/(iterations * 2);
 
 			temp = temp - tile.getHeight() / 15;
 
@@ -253,84 +308,99 @@ function biomify(){
 	}
 }
 
-
-function render(){
+function Renderer(){
 
 	var prCanvas = document.getElementById("preRenderCanvas");
 	prCanvas.height = terrainPoints.length;
 	prCanvas.width = terrainPoints[0].length;
 	var prContext = prCanvas.getContext("2d");
 	var prImageData = prContext.createImageData(prCanvas.width, prCanvas.height);
+
+	var tile;
+	var c;
+	var color;
+	var r;
+	var g;
+	var b;
+	var temp;
+	var t;
+	var shade;
+	var a;
 	
-	var x = terrainPoints[0].length;
-	while(x--){
-		var y = terrainPoints.length;
-		while(y--){
-			var tile = terrainPoints[y][x];
-			var c = Math.round(((tile.getHeight()+worldInfo.belowZero)/worldInfo.difference)*255);
+	function render(){
+		
+		var x = terrainPoints[0].length;
+		while(x--){
+			var y = terrainPoints.length;
+			while(y--){
+				tile = terrainPoints[y][x];
+				c = Math.round((tile.getRelativeHeight())*255);
 
-			var color = [];
-			
-			if(tile.isWater()){
-				if(tile.getTemperature() > 0){
-					color = [0, 0, c];
+				color = [];
+				
+				if(tile.isWater()){
+					if(tile.getTemperature() > -3){
+						color = [0, 0, c];
+					} else {
+						r = Math.abs(tile.getTemperature()) * iterations + 150;
+						g = Math.abs(tile.getTemperature()) * iterations + 180;
+						if(r > 210){
+							r = 210;
+						}
+						if(g > 235){
+							g = 235;
+						}
+						color = [r, g, 255];
+					}
 				} else {
-					var r = Math.abs(tile.getTemperature()) * iterations + 150;
-					var g = Math.abs(tile.getTemperature()) * iterations + 180;
-					if(r > 210){
-						r = 210;
+					temp = Math.floor(((tile.getTemperature() - gradientMin)/gradientRange) * 255);
+					if(temp < 0){
+						temp = 0;
+					} else if(temp > 255){
+						temp = 255;
 					}
-					if(g > 235){
-						g = 235;
+					t = temperatureGradient[temp];
+					color = [t.r, t.g, t.b];
+				}
+
+				shade = 0;
+				
+				if(!tile.isWater()){
+					shade = tile.getHillshade();
+				}
+				
+				for(var i = 0; i <= 2; i++){
+					color[i] += shade;
+					color[i] = Math.round(color[i]);
+					if(color[i] > 255){
+						color[i] = 255;
+					} else if(color[i] < 0){
+						color[i] = 0;
 					}
-					color = [r, g, 255];
 				}
-			} else {
-				var temp = Math.floor(((tile.getTemperature() - gradientMin)/gradientRange) * 255);
-				if(temp < 0){
-					temp = 0;
-				} else if(temp > 255){
-					temp = 255;
-				}
-				var t = temperatureGradient[temp];
-				color = [t.r, t.g, t.b];
-			}
 
-			var shade = 0;
-			
-			if(!tile.isWater()){
-				shade = tile.getHillshade();
-			}
-			
-			var i = 2;
-			while(i--){
-				color[i] += shade;
-				color[i] = Math.round(color[i]);
-				if(color[i] > 255){
-					color[i] = 255;
-				} else if(color[i] < 0){
-					color[i] = 0;
-				}
-			}
+				a = (y * terrainPoints[0].length + x) * 4;
 
-			var a = (y * terrainPoints[0].length + x) * 4;
-
-			prImageData.data[a  ] = color[0];
-			prImageData.data[a+1] = color[1];
-			prImageData.data[a+2] = color[2];
-			prImageData.data[a+3] = 255;
+				prImageData.data[a  ] = color[0];
+				prImageData.data[a+1] = color[1];
+				prImageData.data[a+2] = color[2];
+				prImageData.data[a+3] = 255;
+			}
 		}
+
+		prContext.putImageData(prImageData, 0, 0);
+		context.save();
+		context.imageSmoothingEnabled = false;
+		context.mozImageSmoothingEnabled = false;
+		context.webkitImageSmoothingEnabled = false;
+		context.drawImage(prCanvas, canvas.width / 2 - shortEdge / 2, canvas.height / 2 - shortEdge / 2, shortEdge, shortEdge);
+		context.restore();
 	}
 
-	prContext.putImageData(prImageData, 0, 0);
-	context.save();
-	context.imageSmoothingEnabled = false;
-	context.mozImageSmoothingEnabled = false;
-	context.webkitImageSmoothingEnabled = false;
-	context.drawImage(prCanvas, 0, 0, shortEdge, shortEdge);
-	context.restore();
+	return {
+		render: render
+	};
 }
-
 
 
 
