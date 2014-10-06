@@ -18,10 +18,24 @@
 			body{
 				background-color: #111111;
 			}
+			canvas{
+				position: absolute;
+				top: 0px;
+			}
+			#terrainCanvas{
+				z-index: 0;
+			}
+			#weatherCanvas{
+				z-index: 100;
+				opacity: 1;
+			}
 		</style>
 	</head>
 	<body>
-		<canvas id="renderCanvas">
+		<canvas id="terrainCanvas">
+			Needs more canvas
+		</canvas>
+		<canvas id="weatherCanvas">
 			Needs more canvas
 		</canvas>
 		<div id="preRender" style="visibility: hidden;">
@@ -34,5 +48,11 @@
 			</canvas>
 		</div>
 	</body>
+	<script type="text/javascript">
+		Number.prototype.mod = function(n) {
+			return ((this%n)+n)%n;
+		};
+	</script>
 	<script type="text/javascript" src="./terrainGen.js"></script>
+	<script type="text/javascript" src="./weather.js"></script>
 </html>
