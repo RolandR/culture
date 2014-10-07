@@ -58,10 +58,7 @@ var Terrain = new function(){
 
 		,season: 0
 
-		,terrainPoints: [
-			 [new TerrainPoint(0, 0, 0), new TerrainPoint(0, 1, 0)]
-			,[new TerrainPoint(0, 0, 1), new TerrainPoint(0, 1, 1)]
-		]
+		,terrainPoints: []
 	}
 
 	function calculateHeightDifferences(){
@@ -97,16 +94,25 @@ var Terrain = new function(){
 	}
 
 	var shortEdge;
+	var imageWidth;
+	var imageHeight;
 
 	function windowResize(){
 
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
+
 		
-		if(canvas.width > canvas.height){
+		if(World.terrainPoints[0].length  / canvas.width < World.terrainPoints.length / canvas.height){
 			shortEdge = canvas.height;
+			
+			imageHeight = shortEdge;
+			imageWidth = World.terrainPoints[0].length / World.terrainPoints.length * shortEdge;
 		} else {
 			shortEdge = canvas.width;
+
+			imageWidth = shortEdge;
+			imageHeight = World.terrainPoints.length / World.terrainPoints[0].length * shortEdge;
 		}
 
 		if(renderer){
@@ -124,12 +130,11 @@ var Terrain = new function(){
 
 	function init(){
 		prepareTemperatureGradient();
-		windowResize();
 
 		do{
 			World.terrainPoints = [
-				 [new TerrainPoint(0, 0, 0), new TerrainPoint(0, 1, 0)]
-				,[new TerrainPoint(0, 0, 1), new TerrainPoint(0, 1, 1)]
+				 [new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1)]
+				,[new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1)]
 			];
 			var i = iterations;
 			while(i--){
@@ -137,6 +142,8 @@ var Terrain = new function(){
 			}
 		} while(worldIsTooBoring());
 
+		windowResize();
+		
 		renderer = new Renderer();
 
 		calculateHeightDifferences();
@@ -146,7 +153,7 @@ var Terrain = new function(){
 		biomify();
 		renderer.render();
 
-		//setInterval(animate, 100);
+		setInterval(animate, 50);
 
 		var event = new Event('worldCreated');
 		window.dispatchEvent(event);
@@ -179,7 +186,7 @@ var Terrain = new function(){
 		return false;
 	}
 
-	function TerrainPoint(elevation, x, y){
+	function TerrainPoint(elevation){
 		var isWater;
 		var temperature;
 		var hillshade;
@@ -197,8 +204,6 @@ var Terrain = new function(){
 			,getLatitude: 		function(){return latitude;}
 			,getAirPressure:	function(){return airPressure;}
 			,getAirTemperature:	function(){return airTemperature;}
-			,getX: 				function(){return x;}
-			,getY: 				function(){return y;}
 			
 			,setWater: 			function(w){isWater 		= w;}
 			,setTemperature: 	function(t){temperature 	= t;}
@@ -212,12 +217,18 @@ var Terrain = new function(){
 
 	function addTerrainPoints(){
 		var oldWidth = World.terrainPoints[0].length;
-		var x = World.terrainPoints[0].length-1;
+		var x = World.terrainPoints[0].length - 1;
 		while(x--){
 			var y = World.terrainPoints.length;
 			while(y--){
-				var newheight = (World.terrainPoints[y][x+1].getHeight() + World.terrainPoints[y][x].getHeight())/2;
-				newheight += World.ruggedness * ((Math.random()-0.5) * (World.heightScale / oldWidth));
+				var newheight = 0;
+				if(x == 0){
+					newheight = (World.terrainPoints[y][World.terrainPoints[y].length-1].getHeight() + World.terrainPoints[y][x].getHeight())/2;
+					newheight += World.ruggedness * ((Math.random()-0.5) * (World.heightScale / oldWidth));
+				} else {
+					newheight = (World.terrainPoints[y][x+1].getHeight() + World.terrainPoints[y][x].getHeight())/2;
+					newheight += World.ruggedness * ((Math.random()-0.5) * (World.heightScale / oldWidth));
+				}
 				World.terrainPoints[y].splice(x+1, 0, new TerrainPoint(newheight, x, y));
 			}
 		}
@@ -227,8 +238,13 @@ var Terrain = new function(){
 			var x = World.terrainPoints[y].length;
 			var newRow = [];
 			while(x--){
-				var newheight = (World.terrainPoints[y][x].getHeight() + World.terrainPoints[y+1][x].getHeight())/2;
-				newheight += World.ruggedness * ((Math.random()-0.5) * (World.heightScale / oldHeight));
+				var newheight;
+				if(x == 0){
+					newheight = newRow[newRow.length-1].getHeight();
+				} else {
+					newheight = (World.terrainPoints[y][x].getHeight() + World.terrainPoints[y+1][x].getHeight())/2;
+					newheight += World.ruggedness * ((Math.random()-0.5) * (World.heightScale / oldHeight));
+				}
 				newRow.unshift(new TerrainPoint(newheight, x, y));
 			}
 			World.terrainPoints.splice(y+1, 0, newRow);
@@ -408,7 +424,7 @@ var Terrain = new function(){
 			}
 
 			prContext.putImageData(prImageData, 0, 0);
-			context.drawImage(prCanvas, canvas.width / 2 - shortEdge / 2, canvas.height / 2 - shortEdge / 2, shortEdge, shortEdge);
+			context.drawImage(prCanvas, canvas.width / 2 - imageWidth / 2, canvas.height / 2 - imageHeight / 2, imageWidth, imageHeight);
 		}
 
 		return {
