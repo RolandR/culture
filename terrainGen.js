@@ -52,7 +52,7 @@ var Terrain = new function(){
 		,ruggedness: 1 // lower for smoother terrain, higher for more extreme
 		,waterLevel: 0
 
-		,tempRange: 40 // Minimum to maximum temperature in degrees Celsius
+		,tempRange: 50 // Minimum to maximum temperature in degrees Celsius
 		,minTemp: -10
 		,maxTemp: this.tempRange + this.minTemp
 
@@ -153,7 +153,7 @@ var Terrain = new function(){
 		biomify();
 		renderer.render();
 
-		setInterval(animate, 50);
+		//setInterval(animate, 50);
 
 		var event = new Event('worldCreated');
 		window.dispatchEvent(event);
@@ -193,6 +193,7 @@ var Terrain = new function(){
 		var relativeHeight;
 		var latitude;
 		var airPressure;
+		var newAirPressure;
 		var airTemperature;
 
 		return {
@@ -211,7 +212,10 @@ var Terrain = new function(){
 			,setRelativeHeight: function(r){relativeHeight 	= r;}
 			,setLatitude: 		function(l){latitude	 	= l;}
 			,setAirPressure: 	function(p){airPressure	 	= p;}
+			,setNewAirPressure: function(n){newAirPressure	= n;}
 			,setAirTemperature: function(t){airTemperature	= t;}
+			
+			,applyNewAP: 		function(){airPressure = newAirPressure;}
 		};
 	}
 
@@ -339,7 +343,7 @@ var Terrain = new function(){
 
 	function Renderer(){
 
-		var prCanvas = document.getElementById("preRenderCanvas");
+		var prCanvas = document.getElementById("terrainPreRenderCanvas");
 		prCanvas.height = World.terrainPoints.length;
 		prCanvas.width = World.terrainPoints[0].length;
 		var prContext = prCanvas.getContext("2d");
@@ -372,7 +376,7 @@ var Terrain = new function(){
 				while(y--){
 					tile = World.terrainPoints[y][x];
 					c = Math.floor((tile.getRelativeHeight())*255);
-
+					
 					color = [];
 					
 					if(tile.isWater()){
