@@ -12,7 +12,7 @@ var Menu = new function(){
 					 text: "Generate new"
 					,func: function(){
 						Terrain.clear();
-						setTimeout(Terrain.init)
+						setTimeout(Terrain.init, 0)
 					}
 					,key: "n"
 				}
@@ -60,7 +60,7 @@ var Menu = new function(){
 			menuItem.appendChild(menuText);
 			menuItem.appendChild(menuDots);
 			menuItem.appendChild(menuKey);
-			
+
 			menuItem.onclick = screen.menuItems[i].func;
 			
 			menuElement.appendChild(menuItem);

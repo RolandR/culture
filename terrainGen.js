@@ -114,7 +114,7 @@ var Terrain = new function(){
 		}
 
 		if(renderer){
-			renderer.render();
+			renderer.renderFromPreview();
 		}
 	}
 
@@ -163,7 +163,7 @@ var Terrain = new function(){
 		biomify();
 		renderer.render();
 
-		seasonInterval = setInterval(animate, 250);
+		//seasonInterval = setInterval(animate, 250);
 
 		var event = new Event('worldCreated');
 		window.dispatchEvent(event);
@@ -375,10 +375,6 @@ var Terrain = new function(){
 		var y;
 		
 		function render(){
-
-			context.imageSmoothingEnabled = false;
-			context.mozImageSmoothingEnabled = false;
-			context.webkitImageSmoothingEnabled = false;
 			
 			prImageData = prContext.createImageData(prCanvas.width, prCanvas.height);
 			
@@ -438,13 +434,23 @@ var Terrain = new function(){
 					prImageData.data[a+3] = 255;
 				}
 			}
+			
+			renderFromPreview();
+			
+		}
+
+		function renderFromPreview(){
+			context.imageSmoothingEnabled = false;
+			context.mozImageSmoothingEnabled = false;
+			context.webkitImageSmoothingEnabled = false;
 
 			prContext.putImageData(prImageData, 0, 0);
 			context.drawImage(prCanvas, canvas.width / 2 - imageWidth / 2, canvas.height / 2 - imageHeight / 2, imageWidth, imageHeight);
 		}
 
 		return {
-			render: render
+			 render: render
+			,renderFromPreview: renderFromPreview
 		};
 	}
 	return {
