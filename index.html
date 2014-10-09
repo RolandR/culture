@@ -2,42 +2,25 @@
 <html>
 	<head>
 		<title>
-			World Generator
+			Culturae
 		</title>
-		<style>
-			*{
-				border: none;
-				margin: 0px;
-				padding: 0px;
-			}
-			body, html{
-				width: 100%;
-				height: 100%;
-				overflow: hidden;
-			}
-			body{
-				background-color: #111111;
-			}
-			canvas{
-				position: absolute;
-				top: 0px;
-			}
-			#terrainCanvas{
-				z-index: 0;
-			}
-			#weatherCanvas{
-				z-index: 100;
-				opacity: 1;
-			}
-		</style>
+		<link href="./style.css" rel="stylesheet" type="text/css" media="all">
 	</head>
 	<body>
-		<canvas id="terrainCanvas">
-			Needs more canvas
-		</canvas>
-		<canvas id="weatherCanvas">
-			Needs more canvas
-		</canvas>
+		<div id="menu">
+			<h1>Culturae</h1>
+			<hr />
+			<div id="gameMenu">
+			</div>
+		</div>
+		<div id="canvasContainer">
+			<canvas id="terrainCanvas">
+				Needs more canvas
+			</canvas>
+			<canvas id="weatherCanvas">
+				Needs more canvas
+			</canvas>
+		</div>
 		<div id="preRender" style="visibility: hidden;">
 			<canvas id="terrainPreRenderCanvas">
 				Needs more canvas
@@ -57,5 +40,7 @@
 		};
 	</script>
 	<script type="text/javascript" src="./terrainGen.js"></script>
-	<script type="text/javascript" src="./weather.js"></script>
+	<!--script type="text/javascript" src="./weather.js"></script-->
+	<script type="text/javascript" src="./Game.js"></script>
+	<script type="text/javascript" src="./menu.js"></script>
 </html>

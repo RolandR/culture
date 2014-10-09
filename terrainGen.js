@@ -2,11 +2,7 @@ var Terrain = new function(){
 	var canvas = document.getElementById("terrainCanvas");
 	var context = canvas.getContext("2d");
 
-	canvas.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-	canvas.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-
 	var temperatureGradient = [];
-
 
 	var iterations = 7;
 	
@@ -28,6 +24,7 @@ var Terrain = new function(){
 		tgContext.drawImage(tgImg, 0, 0);
 		var tgImageData = tgContext.getImageData(0, 0, tgCanvas.width, tgCanvas.height).data;
 
+		temperatureGradient = [];
 		var i = 0;
 		while(i < tgImageData.length){
 			temperatureGradient.push({
@@ -96,11 +93,12 @@ var Terrain = new function(){
 	var shortEdge;
 	var imageWidth;
 	var imageHeight;
+	var canvasContainer = document.getElementById("canvasContainer");
 
 	function windowResize(){
 
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
+		canvas.width = canvasContainer.clientWidth;
+		canvas.height = canvasContainer.clientHeight;
 
 		
 		if(World.terrainPoints[0].length  / canvas.width < World.terrainPoints.length / canvas.height){
@@ -120,6 +118,10 @@ var Terrain = new function(){
 		}
 	}
 
+	function clear(){
+		context.clearRect(0, 0, canvas.width, canvas.height);
+	}
+
 	window.addEventListener('load', function(){
 		init();
 	});
@@ -127,14 +129,22 @@ var Terrain = new function(){
 	window.addEventListener('resize', function(){
 		windowResize();
 	});
-
+	
+	var seasonInterval = null;
+	
 	function init(){
+		if(seasonInterval){
+			clearInterval(seasonInterval);
+		}
+		renderer = null;
+		
 		prepareTemperatureGradient();
 
 		do{
 			World.terrainPoints = [
-				 [new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1)]
-				,[new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1)]
+				 [new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1)]
+				,[new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1)]
+				,[new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1), new TerrainPoint(1)]
 			];
 			var i = iterations;
 			while(i--){
@@ -153,14 +163,14 @@ var Terrain = new function(){
 		biomify();
 		renderer.render();
 
-		//setInterval(animate, 50);
+		seasonInterval = setInterval(animate, 250);
 
 		var event = new Event('worldCreated');
 		window.dispatchEvent(event);
 	}
 
 	function animate(){
-		World.season = Math.sin(animationframe / 50);
+		World.season = Math.sin(animationframe / 200);
 		biomify();
 		renderer.render();
 		animationframe++;
@@ -283,6 +293,11 @@ var Terrain = new function(){
 				shade = Math.round(shade * 0.45 / World.ruggedness * Math.sqrt(iterations));
 
 				World.terrainPoints[y][x].setHillshade(shade);
+
+				//while we're at it, set water
+				if(World.terrainPoints[y][x].getHeight() < World.waterLevel){
+					World.terrainPoints[y][x].setWater(true);
+				}
 				
 			}
 		}
@@ -309,31 +324,28 @@ var Terrain = new function(){
 		
 		var worldWidth = World.terrainPoints[0].length;
 		var worldHeight = World.terrainPoints.length;
-		
+
+		var y;
 		var x = worldWidth;
 		while(x--){
-			var y = worldHeight;
+			y = worldHeight;
 			while(y--){
 				
 				tile = World.terrainPoints[y][x];
-				
-				if(tile.getHeight() < World.waterLevel){
-					tile.setWater(true);
-				}
 
-				temp = tile.getLatitude() * World.tempRange + World.minTemp;
+				temp = (tile.getLatitude() * World.tempRange) + World.minTemp;
 
 				temp += (y - worldHeight/2) * World.season/(iterations * 2);
 
 				temp = temp - tile.getHeight() / 15;
 
-				if(temp < World.minTemp){
+			/*	if(temp < World.minTemp){
 					temp = World.minTemp;
 				}
 
 				if(temp >= World.maxTemp){
 					temp = World.maxTemp;
-				}
+				}*/
 				
 				tile.setTemperature(temp);
 		
@@ -439,6 +451,7 @@ var Terrain = new function(){
 		 init: init
 		,render: renderer
 		,getWorld: function(){return World;}
+		,clear: clear
 	}
 }
 
