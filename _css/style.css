@@ -1,3 +1,4 @@
+
 *{
 	border: none;
 	margin: 0px;
@@ -17,6 +18,7 @@ hr{
 
 body{
 	background-color: #111111;
+	font-family: monospace;
 }
 
 a{
@@ -27,43 +29,90 @@ a:hover{
 	text-decoration: none;
 }
 
-#canvasContainer{
+.screen{
 	position: absolute;
-	top: 0px;
-	left: 0px;
+	top: 50px;
+	right: 0px;
 	bottom: 0px;
-	right: 300px;
+	left: 0px;
+	background-color: #111111;
+	padding: 10px;
 }
 
-#terrainCanvas{
+#canvasContainer{
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
+}
+
+#hangOn{
+	color: #FFFFFF;
+	position: absolute;
+	width: 300px;
+	left: 50%;
+	margin-left: -150px;
+	top: 50%;
+	text-align: center;
 	z-index: 0;
 }
 
-#weatherCanvas{
-	z-index: 100;
-	opacity: 1;
+#terrainCanvas{
+	z-index: 1000;
 }
 
 #menu{
 	position: absolute;
-	right: 0px;
-	width: 300px;
+	left: 0px;
+	height: 50px;
 	top: 0px;
-	bottom: 0px;
+	right: 0px;
 	background-color: #000000;
-	border-left: 1px #555555 solid;
-	color: #BBBBBB;
+	border-bottom: 1px #555555 solid;
+	color: #DDDDDD;
 	font-family: monospace;
 	box-sizing: border-box;
 	padding: 3px;
 }
 
+#tabs{
+	position: absolute;
+	bottom: 0px;
+	left: 200px;
+}
+
+.tab{
+	cursor: pointer;
+	display: inline-block;
+	width: 110px;
+	font-size: 17px;
+	background-color: #222222;
+	text-align: center;
+	margin-right: 7px;
+	padding: 5px;
+	border: 1px #555555 solid;
+	border-bottom: none;
+}
+
+.tab:hover, .tab.active:hover{
+	background-color: #444444;
+}
+
+.tab.active{
+	color: #00EE00;
+	background-color: #333333;
+}
+
 h1{
 	color: #FFFFFF;
-	text-align: center;
 	font-size: 1.5em;
-	line-height: 2em;
+	line-height: 1em;
+	margin-top: 5px;
 	font-weight: 200;
+	margin-left: 10px;
+}
+
+#subtitle{
+	margin-left: 10px;
 }
 
 #gameMenu{
@@ -72,8 +121,8 @@ h1{
 
 footer{
 	position: absolute;
-	bottom: 10px;
 	right: 10px;
+	top: 6px;
 	line-height: 1.4em;
 	text-align: right;
 }

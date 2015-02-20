@@ -1,3 +1,4 @@
+
 var Game = function(){
 	function start(){
 

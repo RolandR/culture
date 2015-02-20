@@ -1,3 +1,4 @@
+
 var Menu = new function(){
 
 	var menuContainer = document.getElementById("gameMenu");
@@ -6,7 +7,7 @@ var Menu = new function(){
 	
 	var MenuScreens = {
 		worldGen: {
-			 title: "World"
+			 title: "World generation"
 			,menuItems:[
 				 {
 					 text: "Generate new"

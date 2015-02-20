@@ -1,30 +1,55 @@
 <!doctype html>
 <html>
+	<meta charset="utf-8" />
 	<head>
 		<title>
 			Culturae
 		</title>
-		<link href="./style.css" rel="stylesheet" type="text/css" media="all">
+		<link href="./_css/style.css" rel="stylesheet" type="text/css" media="all">
 	</head>
 	<body>
 		<div id="menu">
 			<h1>Culturae</h1>
-			<hr />
-			<nav id="gameMenu">
-			</nav>
+			<span id="subtitle">A Tale of Foo and Bar</span>
+			<div id="tabs">
+			
+			</div>
 			<footer>
 				<p>Culturae is on <a href="https://github.com/RolandR/culture" target="_blank">GitHub</a>.</p>
 				<p>Made by <a href="http://rolandrytz.ch" target="_blank">Roland Rytz</a>.</p>
 			</footer>
 		</div>
-		<div id="canvasContainer">
-			<canvas id="terrainCanvas">
-				Needs more canvas
-			</canvas>
-			<canvas id="weatherCanvas">
-				Needs more canvas
-			</canvas>
+		
+		<!-- Main content -->
+		
+		<div id="content">
+
+			<div class="screen" id="screen-buildings">
+				Buildings buildings buildings!
+			</div>
+			
+			<div class="screen" id="screen-stocks">
+				This is the stocks screen!
+			</div>
+			
+			<div class="screen" id="screen-worldmap">
+				<div id="canvasContainer">
+					<!--span id="hangOn">
+						Generating world...
+					</span-->
+					<canvas id="terrainCanvas">
+						Needs more canvas
+					</canvas>
+					<canvas id="weatherCanvas">
+						Needs more canvas
+					</canvas>
+				</div>
+			</div>
+			
 		</div>
+		
+		<!-- Pre-render stuff -->
+		
 		<div id="preRender" style="visibility: hidden;">
 			<canvas id="terrainPreRenderCanvas">
 				Needs more canvas
@@ -32,19 +57,18 @@
 			<canvas id="weatherPreRenderCanvas">
 				Needs more canvas
 			</canvas>
-			<img src="./temperatureGradient.png" alt="" id="temperatureGradient" />
+			<img src="./_assets/temperatureGradient.png" alt="" id="temperatureGradient" />
 			<canvas id="temperatureGradientCanvas">
 				Needs more canvas
 			</canvas>
 		</div>
+		
+		<!------------------------>
+		
 	</body>
-	<script type="text/javascript">
-		Number.prototype.mod = function(n) {
-			return ((this%n)+n)%n;
-		};
-	</script>
-	<script type="text/javascript" src="./terrainGen.js"></script>
-	<!--script type="text/javascript" src="./weather.js"></script-->
-	<script type="text/javascript" src="./Game.js"></script>
-	<script type="text/javascript" src="./menu.js"></script>
+	<script type="text/javascript" src="./_js/terrainGen.js"></script>
+	<!--script type="text/javascript" src="./_js/weather.js"></script-->
+	<script type="text/javascript" src="./_js/Game.js"></script>
+	<script type="text/javascript" src="./_js/Screens.js"></script>
+	<!--script type="text/javascript" src="./_js/menu.js"></script-->
 </html>

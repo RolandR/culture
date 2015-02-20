@@ -1,3 +1,4 @@
+
 var Terrain = new function(){
 	var canvas = document.getElementById("terrainCanvas");
 	var context = canvas.getContext("2d");
@@ -190,7 +191,7 @@ var Terrain = new function(){
 		}
 		var ratio = water/total;
 		if(ratio > 0.7 || ratio < 0.3){
-			console.log("Rejected world - Too boring: "+ratio);
+			console.log("Rejected world - Too boring: "+Math.round(ratio*100)+"% water");
 			return true;
 		}
 		return false;

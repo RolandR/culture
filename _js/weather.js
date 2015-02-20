@@ -1,3 +1,4 @@
+
 var Weather = new function(){
 	var canvas = document.getElementById("weatherCanvas");
 	var context = canvas.getContext("2d");
